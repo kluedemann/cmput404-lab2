@@ -1,4 +1,5 @@
 import socket
+from threading import Thread
 
 
 BUFFER_SIZE = 4096
@@ -18,7 +19,7 @@ def create_request(data):
     return response
 
 
-def start_server():
+def start_threaded_server():
     address = "localhost", 8080
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
@@ -32,14 +33,36 @@ def start_server():
             conn, addr = s.accept()
             print("Connected by", addr)
             
-            #recieve data, wait a bit, then send it back
-            full_data = conn.recv(BUFFER_SIZE)
-            response = create_request(full_data)
-            conn.sendall(response)
-            conn.close()
+            t = Thread(target=handle_connection, args=(conn,))
+            t.start()
+
+
+def handle_connection(conn):
+    
+    #recieve data, wait a bit, then send it back
+    full_data = conn.recv(BUFFER_SIZE)
+    response = create_request(full_data)
+    conn.sendall(response)
+    conn.close()
+
+
+def start_server():
+    address = "localhost", 8080
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+
+        # Bind and listen
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind(address)
+        s.listen(2)
+        
+        # continuously listen for connections
+        while True:
+            conn, addr = s.accept()
+            print("Connected by", addr)
+            handle_connection(conn)
 
 def main():
-    start_server()
+    start_threaded_server()
 
 
 if __name__ == "__main__":

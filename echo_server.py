@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 import socket
 import time
+from threading import Thread
 
 #define address & buffer size
 HOST = ""
 PORT = 8001
 BUFFER_SIZE = 1024
+
+
+def handle_connection(conn):
+    full_data = conn.recv(BUFFER_SIZE)
+    time.sleep(0.5)
+    print(full_data)
+    conn.sendall(full_data)
+    conn.close()
+
 
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -24,11 +34,8 @@ def main():
             print("Connected by", addr)
             
             #recieve data, wait a bit, then send it back
-            full_data = conn.recv(BUFFER_SIZE)
-            time.sleep(0.5)
-            print(full_data)
-            conn.sendall(full_data)
-            conn.close()
+            t = Thread(target=handle_connection, args=(conn,))
+            t.start()
 
 if __name__ == "__main__":
     main()
