@@ -1,0 +1,11 @@
+1. When creating the socket, we specify the second argument as socket.SOCK_STREAM.
+2. Both use the same socket type. Client sockets create connections using connect(). 
+Server sockets use bind(), listen(), and accept() to bind to a port, listen for connections, and 
+accept incoming connections from clients.
+3. We use the following line to reuse a bind port:
+    setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+This will set the option to reuse address to the value 1.
+4. We get the client IP address and port number.
+5. recv() returns an empty bytestring (b'') 
+after the client has closed the connection and the server has read all of the data.
+6. https://github.com/kluedemann/cmput404-lab2
