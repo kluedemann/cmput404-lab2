@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+
+"""
+Module containing code to run a concurrent echo server.
+
+Modified from echo_server.py code on eClass.
+"""
+
 import socket
 import time
 from threading import Thread
@@ -10,14 +17,23 @@ BUFFER_SIZE = 1024
 
 
 def handle_connection(conn):
+    """Send the data back to the client after a brief delay.
+    
+    Params:
+        conn - the client socket
+    """
+    SLEEP_TIME = 0.5
+
     full_data = conn.recv(BUFFER_SIZE)
-    time.sleep(0.5)
+    time.sleep(SLEEP_TIME)
     print(full_data)
     conn.sendall(full_data)
     conn.close()
 
 
 def main():
+    """Run the threaded echo server."""
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
         #QUESTION 3
@@ -33,9 +49,13 @@ def main():
             conn, addr = s.accept()
             print("Connected by", addr)
             
-            #recieve data, wait a bit, then send it back
+            # Non-threaded version:
+            # handle_connection(conn)
+
+            # Use threads to allow concurrent connections
             t = Thread(target=handle_connection, args=(conn,))
             t.start()
+
 
 if __name__ == "__main__":
     main()
